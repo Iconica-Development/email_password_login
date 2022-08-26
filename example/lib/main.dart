@@ -31,6 +31,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late final EmailPasswordFormController _loginFormController =
+      EmailPasswordFormController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    _loginFormController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,25 +47,36 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: EmailPasswordForm(
-          emailLabel: const Text('Email'),
-          emailPrefixIcon: const Icon(Icons.person),
-          passwordLabel: const Text(
-            'Wachtwoord',
-          ),
-          passwordPrefixIcon: const Icon(Icons.password),
-          inputDecoration: const InputDecoration(
-            floatingLabelBehavior: FloatingLabelBehavior.never,
-            border: InputBorder.none,
-          ),
-          togglePassword: true,
-          showPasswordDefault: false,
-          inputContainerBuilder: (context, input) => Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: input,
+        child: Column(
+          children: [
+            EmailPasswordForm(
+              controller: _loginFormController,
+              emailLabel: const Text('Email'),
+              emailPrefixIcon: const Icon(Icons.person),
+              passwordLabel: const Text(
+                'Wachtwoord',
+              ),
+              passwordPrefixIcon: const Icon(Icons.password),
+              inputDecoration: const InputDecoration(
+                floatingLabelBehavior: FloatingLabelBehavior.never,
+                border: InputBorder.none,
+              ),
+              togglePassword: true,
+              showPasswordDefault: false,
+              inputContainerBuilder: (context, input) => Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: input,
+                ),
+              ),
             ),
-          ),
+            ElevatedButton(
+              onPressed: () {
+                _loginFormController.submit();
+              },
+              child: const Text('Login'),
+            ),
+          ],
         ),
       ),
     );

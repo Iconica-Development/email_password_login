@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shell_email_password_login/shell_email_password_login.dart';
-import 'package:shell_email_password_login/src/email_password_form_data.dart';
 
+/// A basic widget containing an email and password login form
+/// 
+/// The main use case of this widget is facilitating the core UI functionality
+/// of a login screen based on email and password login.
+/// 
+/// The inputs in this widget can be rewritten 
 class EmailPasswordForm extends StatefulWidget {
   const EmailPasswordForm({
     Key? key,
@@ -16,11 +21,15 @@ class EmailPasswordForm extends StatefulWidget {
     this.inputTextStyle,
     this.inputContainerBuilder = _defaultInputContainerBuilder,
     this.getValidationError,
+    this.controller,
+    this.onSubmit,
+    this.initialData,
   }) : super(key: key);
 
   final String Function(EmailPasswordFormValidationError error)?
       getValidationError;
   final EdgeInsets? padding;
+  final EmailPasswordFormController? controller;
   final Widget? emailPrefixIcon;
   final Widget? emailLabel;
   final Widget? passwordPrefixIcon;
@@ -29,6 +38,8 @@ class EmailPasswordForm extends StatefulWidget {
   final bool showPasswordDefault;
   final TextStyle? inputTextStyle;
   final InputDecoration? inputDecoration;
+  final EmailPasswordFormData? initialData;
+  final void Function(EmailPasswordFormData data)? onSubmit;
   final Widget Function(BuildContext context, Widget input)
       inputContainerBuilder;
 
@@ -36,18 +47,33 @@ class EmailPasswordForm extends StatefulWidget {
       input;
 
   @override
-  State<EmailPasswordForm> createState() => _EmailPasswordFormState();
+  State<EmailPasswordForm> createState() => EmailPasswordFormState();
 }
 
-class _EmailPasswordFormState extends State<EmailPasswordForm> {
+class EmailPasswordFormState extends State<EmailPasswordForm> {
   late bool _showPasswordText;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late EmailPasswordFormData data;
+
+  late final TextEditingController _emailController = TextEditingController();
+  late final TextEditingController _passwordController =
+      TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _showPasswordText = widget.showPasswordDefault;
+    widget.controller?.attach(this);
+    if (widget.initialData != null) {
+      data = widget.initialData!;
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
   }
 
   String _getErrorText(EmailPasswordFormValidationError error) {
@@ -68,6 +94,7 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
               TextFormField(
                 style: widget.inputTextStyle,
                 textInputAction: TextInputAction.next,
+                controller: _emailController,
                 decoration: (widget.inputDecoration ?? const InputDecoration())
                     .copyWith(
                   label: widget.emailLabel,
@@ -97,6 +124,7 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
                 style: widget.inputTextStyle,
                 obscureText: !_showPasswordText,
                 textInputAction: TextInputAction.done,
+                controller: _passwordController,
                 decoration: (widget.inputDecoration ?? const InputDecoration())
                     .copyWith(
                   label: widget.passwordLabel,
@@ -122,12 +150,23 @@ class _EmailPasswordFormState extends State<EmailPasswordForm> {
     );
   }
 
-  void save() {
+  void setData(EmailPasswordFormData data) {
+    _emailController.text = data.email;
+    _passwordController.text = data.password;
+    setState(() {
+      this.data = data;
+    });
+  }
+
+  EmailPasswordFormData? save() {
     var form = _formKey.currentState;
     if (form != null && form.validate()) {
       data = EmailPasswordFormData();
       form.save();
+      widget.onSubmit?.call(data);
+      return data;
     }
+    return null;
   }
 
   IconButton? _buildShowPasswordIcon() {
