@@ -1,12 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:shell_email_password_login/shell_email_password_login.dart';
-
 void main() {
-  test('adds one to input values', () {
-    final calculator = Calculator();
-    expect(calculator.addOne(2), 3);
-    expect(calculator.addOne(-7), -6);
-    expect(calculator.addOne(0), 1);
+  test('Make sure we have a test so flutter test works', () {
+    expect(true, true);
   });
 }
